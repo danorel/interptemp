@@ -5,6 +5,19 @@ Template for fast mech-interp experiments: generation, activations, intervention
 built in. Default stack: [nnterp](https://github.com/Butanium/nnterp) (nnsight) + Qwen3 +
 OpenRouter, managed with `uv`.
 
+## Status
+
+Early and lightly tested — please open an issue if something breaks.
+
+| Component | Tested |
+|---|---|
+| nnterp backend, interventions, sanity checks | ✅ end-to-end on Qwen3-0.6B (CPU); unit + integration tests |
+| LLM judge via OpenRouter (Gemini, Claude Haiku) | ✅ real API runs |
+| Blind labeling CLI | ✅ manual use |
+| GPU / Qwen3-8B, `make sanity` on a pod | ❌ not yet |
+| vLLM backend (`envs/vllm`) | ❌ never run |
+| Gemma config, `infra/setup_pod.sh` | ❌ not yet |
+
 ## Quickstart
 
 ```bash
@@ -46,6 +59,7 @@ src/interptemp/
   judges/           Judge ABC; LLMJudge (OpenRouter, cached), SubstringJudge; metrics (kappa)
   experiment.py     Experiment ABC: lazy model/judge, run dir, save helpers
   sanity.py         reusable checks + SanityExperiment
+  label.py          blind labeling CLI (`interp-label label|summary`) for judge validation
   config.py         typed YAML configs + dotted CLI overrides
   registry.py       short names -> classes; or any "module:Class"
 configs/models/     per-model YAMLs (qwen3-8b, qwen3-0.6b, gemma-3-4b-it, qwen3-8b-vllm)

@@ -10,4 +10,3 @@ outputs/
 .pytest_cache/
 .ruff_cache/
 envs/vllm/.venv/
-envs/vllm/uv.lock

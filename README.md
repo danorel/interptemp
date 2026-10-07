@@ -16,7 +16,7 @@ Early and lightly tested — please open an issue if something breaks.
 | Blind labeling CLI | ✅ manual use |
 | `infra/setup_pod.sh` | ✅ end-to-end on A100 80GB, driver 570 (CUDA 12.8); real CUDA kernel in both envs |
 | vLLM backend (`envs/vllm`) | ✅ generation smoke (Qwen3-0.6B) on the same pod |
-| nnterp backend on GPU, `make sanity` with Qwen3-8B | ❌ not yet |
+| nnterp backend on GPU, `make sanity` with Qwen3-8B | ✅ all 7 checks pass on A100 80GB (HF parity max diff 0.0) |
 | Gemma config | ❌ not yet |
 
 ## Quickstart

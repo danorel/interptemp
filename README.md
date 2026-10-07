@@ -14,9 +14,10 @@ Early and lightly tested — please open an issue if something breaks.
 | nnterp backend, interventions, sanity checks | ✅ end-to-end on Qwen3-0.6B (CPU); unit + integration tests |
 | LLM judge via OpenRouter (Gemini, Claude Haiku) | ✅ real API runs |
 | Blind labeling CLI | ✅ manual use |
-| GPU / Qwen3-8B, `make sanity` on a pod | ❌ not yet |
-| vLLM backend (`envs/vllm`) | ❌ never run |
-| Gemma config, `infra/setup_pod.sh` | ❌ not yet |
+| `infra/setup_pod.sh` | ✅ end-to-end on A100 80GB, driver 570 (CUDA 12.8); real CUDA kernel in both envs |
+| vLLM backend (`envs/vllm`) | ✅ generation smoke (Qwen3-0.6B) on the same pod |
+| nnterp backend on GPU, `make sanity` with Qwen3-8B | ❌ not yet |
+| Gemma config | ❌ not yet |
 
 ## Quickstart
 
@@ -36,15 +37,19 @@ Each run writes `outputs/<name>/<timestamp>/` with the resolved `config.yaml`, `
 
 ## GPU box (Sesterce / Runpod / Vast)
 
-1. Rent **1× H100 80GB** (or A100 80GB). Qwen3-8B bf16 ≈ 16 GB weights; the rest is KV cache
-   for long CoT, cached activations, and the 2nd weight copy used by the HF-parity check.
-   Attach a persistent volume if available (mount at `/workspace`).
-2. `git clone <repo> /workspace/<proj> && cd /workspace/<proj> && bash infra/setup_pod.sh`
-   (`WITH_VLLM=1` to also build the vLLM env, `MODEL=...` to prefetch another model).
-3. Connect from Cursor / VS Code via Remote-SSH.
+1. Rent **1× A100 80GB** (H100 is faster but rarely needed). Qwen3-8B bf16 ≈ 16 GB weights;
+   the rest is KV cache for long CoT, cached activations, and the 2nd weight copy used by the
+   HF-parity check. Use a plain **Ubuntu + CUDA ≥ 12.6** image (no Docker image needed).
+   torch is pinned to cu126 and vLLM to its cu129 build, because PyPI's CUDA 13 wheels fail
+   with "NVIDIA driver is too old" on most rented-pod drivers.
+2. `git clone <repo> && cd <proj> && WITH_VLLM=1 bash infra/setup_pod.sh`
+   (`MODEL=...` to prefetch another model). Caches go to `/workspace` or `/ephemeral` if
+   present (`PERSIST=...` to override); the script checks the driver and runs a CUDA kernel
+   in both envs, so a broken image fails here, not mid-experiment.
+3. Connect from Cursor / VS Code via Remote-SSH; run long jobs inside `tmux`.
 4. `make sanity` — **all checks must pass before any experiment on a new model/pod.**
 5. Stop the instance when idle. Code lives in git; pull results with
-   `rsync -avz <host>:/workspace/<proj>/outputs/ outputs/`.
+   `rsync -avz <host>:<proj>/outputs/ outputs/`.
 
 ## Layout
 
